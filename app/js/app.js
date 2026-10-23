@@ -31,15 +31,22 @@ function parseHash() {
 }
 function go(route) {
   const h = route.view === 'board' ? `#/b/${route.boardId}` : route.view === 'all' ? '#/all' : '#/today';
-  if (location.hash !== h) location.hash = h; else { ui.route = route; render(); }
+  const changed = ui.route.view !== route.view || ui.route.boardId !== route.boardId;
+  ui.route = route;
+  ui.kbd = null;
+  render({ resetScroll: changed });
+  // Mirror the view in the address so reloads and back work where the browser allows it.
+  try { if (location.hash !== h) history.pushState(null, '', h); } catch {}
   $('#app').classList.remove('nav-open');
 }
-window.addEventListener('hashchange', () => {
+const onRouteChange = () => {
   ui.route = parseHash();
   ui.kbd = null;
   render({ resetScroll: true });
   $('#app').classList.remove('nav-open');
-});
+};
+window.addEventListener('hashchange', onRouteChange);
+window.addEventListener('popstate', onRouteChange);
 
 // ---------- rendering ----------
 function render({ resetScroll = false, flipSkip = null } = {}) {
@@ -565,7 +572,7 @@ function contactSection(card) {
   const ph = contactKind ? S.CONTACT_KINDS[contactKind].placeholder : 'Email, phone, website, or social link';
   return `<div class="p-sec" data-contact-sec><div class="p-label"><span>Contact</span></div>
     ${list.length ? `<div class="contacts">${list.map(contactRow).join('')}</div>` : ''}
-    ${!list.length || contactKind ? `<div class="contact-chips">${(contactKind && S.CONTACT_KINDS[contactKind].base ? ['instagram', 'youtube', 'tiktok', 'x', 'linkedin'] : ['email', 'phone', 'website', 'instagram', 'youtube', 'linkedin']).map((k) => `<button type="button" class="filter-chip" data-ckind="${k}" aria-pressed="${contactKind === k}">${icon(S.CONTACT_KINDS[k].icon, 13)}${esc(S.CONTACT_KINDS[k].label)}</button>`).join('')}</div>` : ''}
+    <div class="contact-chips" role="group" aria-label="Add contact">${(contactKind && S.CONTACT_KINDS[contactKind].base ? ['instagram', 'youtube', 'tiktok', 'x', 'linkedin'] : ['email', 'phone', 'website', 'instagram', 'youtube', 'linkedin']).map((k) => `<button type="button" class="filter-chip" data-ckind="${k}" aria-pressed="${contactKind === k}">${contactKind === k ? '' : icon('plus', 12)}${icon(S.CONTACT_KINDS[k].icon, 13)}${esc(S.CONTACT_KINDS[k].label)}</button>`).join('')}</div>
     <form class="contact-add" data-contact-form>
       <select class="field" name="kind" aria-label="Contact type"><option value="">Detect</option>${kinds.map(([k, v]) => `<option value="${k}" ${contactKind === k ? 'selected' : ''}>${esc(v.label)}</option>`).join('')}</select>
       <input class="field" name="value" placeholder="${esc(ph)}" autocomplete="off" aria-label="Add contact" inputmode="${contactKind === 'phone' ? 'tel' : contactKind === 'email' ? 'email' : 'text'}">
