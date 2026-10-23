@@ -1,0 +1,189 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Relo · Keep good connections moving</title>
+  <meta name="description" content="Relo is a private, visual workspace for the people, brands, tools, and opportunities you want to do something with. No account. Your data stays on your device.">
+  <meta property="og:title" content="Relo · Keep good connections moving">
+  <meta property="og:description" content="A calm, visual home for the people and possibilities you want to follow up with.">
+  <meta name="theme-color" content="#ffffff">
+  <link rel="icon" href="assets/icon.svg" type="image/svg+xml">
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400..700&display=swap">
+  <link rel="stylesheet" href="assets/tokens.css">
+  <link rel="stylesheet" href="landing.css">
+</head>
+<body>
+  <header class="nav" id="nav">
+    <div class="wrap nav-inner">
+      <a class="logo" href="./" aria-label="Relo home">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linejoin="round" aria-hidden="true"><rect x="2.5" y="4.5" width="12" height="12" rx="4"/><rect class="logo-front" x="9.5" y="7.5" width="12" height="12" rx="4"/></svg>
+        Relo
+      </a>
+      <nav class="nav-links" aria-label="Sections">
+        <a href="#how">How it works</a>
+        <a href="#claude">Claude</a>
+        <a href="#privacy">Privacy</a>
+      </nav>
+      <a class="btn btn-dark" href="app/">Open Relo</a>
+    </div>
+  </header>
+
+  <main>
+    <section class="hero" aria-labelledby="hero-title">
+      <div class="wrap hero-copy">
+        <p class="eyebrow"><span class="pulse" aria-hidden="true"></span>A personal CRM for people who build things</p>
+        <h1 id="hero-title">Good connections shouldn't get lost.</h1>
+        <p class="lede">Keep track of the people, brands, ideas, and opportunities you want to do something with. Then follow through.</p>
+        <div class="cta-row">
+          <a class="btn btn-dark btn-lg" href="app/">Start your workspace</a>
+          <a class="btn btn-light btn-lg" href="#how">See how it works</a>
+        </div>
+        <p class="fine">Private by default. No account required.</p>
+      </div>
+
+      <div class="wrap">
+        <div class="demo" id="demo" data-state="scattered">
+          <div class="demo-cols" aria-hidden="true">
+            <div class="demo-col"><span class="dot" style="--c:var(--person)"></span>Reach out</div>
+            <div class="demo-col"><span class="dot" style="--c:var(--creator)"></span>In conversation</div>
+            <div class="demo-col"><span class="dot" style="--c:var(--tool)"></span>Explore</div>
+          </div>
+          <div class="demo-cards" id="demo-cards">
+            <article class="dcard" data-k="maya" data-col="0" data-row="0" style="--c:var(--creator);--cs:var(--creator-soft)">
+              <div class="dtop"><span class="av">MC</span><b>Maya Chen</b></div>
+              <div class="dmeta"><span class="chip">Creator</span><span class="note">Need to follow up</span><span class="due">Fri · 10 AM</span></div>
+            </article>
+            <article class="dcard" data-k="north" data-col="1" data-row="0" style="--c:var(--brand-cat);--cs:var(--brand-cat-soft)">
+              <div class="dtop"><span class="av">NW</span><b>Northstar Wellness</b></div>
+              <div class="dmeta"><span class="chip">Brand</span><span class="note">Saved somewhere</span></div>
+            </article>
+            <article class="dcard" data-k="alex" data-col="0" data-row="1" style="--c:var(--person);--cs:var(--person-soft)">
+              <div class="dtop"><span class="av">AR</span><b>Alex Rivera</b></div>
+              <div class="dmeta"><span class="chip">Collaborator</span><span class="note">Somewhere in your DMs</span></div>
+            </article>
+            <article class="dcard" data-k="studio" data-col="2" data-row="0" style="--c:var(--tool);--cs:var(--tool-soft)">
+              <div class="dtop"><span class="av">SN</span><b>Studio Notes</b></div>
+              <div class="dmeta"><span class="chip">Tool</span><span class="note">Look into later</span></div>
+            </article>
+          </div>
+          <div class="demo-foot">
+            <span class="demo-state" id="demo-state" aria-live="polite">Four good intentions, scattered across four apps.</span>
+            <button class="btn btn-dark" id="demo-btn" aria-pressed="false">Put them in order</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="band" id="how" aria-labelledby="problem-title">
+      <div class="wrap split">
+        <div>
+          <p class="kicker">The problem</p>
+          <h2 id="problem-title">From “I should reach out” to “I did.”</h2>
+          <p class="body">Your next collaboration shouldn't depend on remembering a tab you opened three weeks ago. Most CRMs are built for sales teams chasing quota. Relo is built for the earlier, messier work of remembering who matters and deciding what to do next.</p>
+        </div>
+        <ul class="scatter-list" aria-label="Where good intentions hide">
+          <li><span>Browser tab</span>Podcast host you loved</li>
+          <li><span>Notes app</span>Brand to pitch in spring</li>
+          <li><span>Instagram DM</span>Creator who replied “let's talk”</li>
+          <li><span>Spreadsheet</span>Tools to try, last edited in March</li>
+          <li class="arrow" aria-hidden="true"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round"><path d="M12 5v14M6 13l6 6 6-6"/></svg></li>
+          <li class="one"><span>Relo</span>One place, each with a next step</li>
+        </ul>
+      </div>
+    </section>
+
+    <section class="section" aria-labelledby="model-title">
+      <div class="wrap">
+        <p class="kicker center">One card for everything</p>
+        <h2 class="center" id="model-title">One place for all the people and possibilities.</h2>
+        <p class="body center narrow">Creators, companies, tools, collaborators, and opportunities. Capture them once. Give each one a next step.</p>
+        <div class="types" aria-label="Card types">
+          <div class="tcard" style="--c:var(--person);--cs:var(--person-soft)"><span class="av">LP</span><b>Lena Park</b><i>Person</i><small>Say thanks for the portfolio notes</small></div>
+          <div class="tcard" style="--c:var(--creator);--cs:var(--creator-soft)"><span class="av">JO</span><b>Jordan Okafor</b><i>Creator</i><small>Pitch a guest episode</small></div>
+          <div class="tcard" style="--c:var(--brand-cat);--cs:var(--brand-cat-soft)"><span class="av">LA</span><b>Lumen Audio</b><i>Brand</i><small>Follow up on the spring series</small></div>
+          <div class="tcard" style="--c:var(--tool);--cs:var(--tool-soft)"><span class="av">FW</span><b>Framewise</b><i>Tool</i><small>Try it on the next thumbnail</small></div>
+          <div class="tcard" style="--c:var(--opportunity);--cs:var(--opportunity-soft)"><span class="av">CG</span><b>Creator grant</b><i>Opportunity</i><small>Read the application guide</small></div>
+        </div>
+        <div class="features">
+          <div><h3>A card in five seconds</h3><p>Paste a link or a handle, or just type a name. Everything else is optional.</p></div>
+          <div><h3>Move things around</h3><p>Drag cards between stages. Duplicate, park, and rearrange without thinking about it.</p></div>
+          <div><h3>A next step on every card</h3><p>Today shows who you meant to follow up with. Gentle, never naggy.</p></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="band" aria-labelledby="calm-title">
+      <div class="wrap split rev">
+        <div class="mini-board" aria-hidden="true">
+          <div class="mb-head"><b>Partnerships</b><span class="cap"><i style="width:60%"></i></span><em>12 of 20 in play</em></div>
+          <div class="mb-cols">
+            <div class="mb-col"><span>Reach out</span><div class="mb-card"></div><div class="mb-card short"></div></div>
+            <div class="mb-col"><span>Active</span><div class="mb-card"></div></div>
+            <div class="mb-col parked"><span>Parked</span><div class="mb-card ghost"></div><small>Doesn't count</small></div>
+          </div>
+        </div>
+        <div>
+          <p class="kicker">Calm by design</p>
+          <h2 id="calm-title">A little structure goes a long way.</h2>
+          <p class="body">Move cards. Park distractions. Keep your attention on the relationships that matter now. Every board has an attention cap, so it never turns into a backlog. Parking something is a real decision, and it frees up room.</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" id="claude" aria-labelledby="claude-title">
+      <div class="wrap">
+        <p class="kicker center">Claude + MCP · coming next</p>
+        <h2 class="center" id="claude-title">Tell Claude. Relo takes care of the details.</h2>
+        <p class="body center narrow">Add people, log conversations, move cards, and plan follow-ups in natural language. You stay in control of every change.</p>
+        <div class="claude" id="claude-demo">
+          <span class="demo-tag">Demo</span>
+          <div class="ask"><span class="who">You ask Claude</span>“Add Maya Chen to Creators, move her to Reach out, and remind me Friday morning to send an introduction.”</div>
+          <ol class="changes">
+            <li><span class="tick"></span><div><b>Created Maya Chen</b><small>Creator</small></div></li>
+            <li><span class="tick"></span><div><b>Placed in Creators → Reach out</b><small>Board stays under its cap</small></div></li>
+            <li><span class="tick"></span><div><b>Next step: send an introduction</b><small>Friday · 9:00 AM, your time zone</small></div></li>
+          </ol>
+          <div class="result"><span>Three changes. One conversation. A visible history and an undo.</span><button class="undo" type="button" tabindex="-1">Undo</button></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="band" id="privacy" aria-labelledby="privacy-title">
+      <div class="wrap split">
+        <div>
+          <p class="kicker">Yours</p>
+          <h2 id="privacy-title">Your relationships belong to you.</h2>
+          <p class="body">Your workspace lives on your device. Export it whenever you want. Connect Claude only when you choose.</p>
+        </div>
+        <ul class="facts">
+          <li><b>No account</b>Open it and start.</li>
+          <li><b>No trackers</b>No analytics, no ads.</li>
+          <li><b>Works offline</b>Install it like an app.</li>
+          <li><b>No lock-in</b>JSON and CSV export, anytime.</li>
+        </ul>
+      </div>
+    </section>
+
+    <section class="close" aria-labelledby="close-title">
+      <div class="wrap center">
+        <h2 id="close-title">Keep good connections moving.</h2>
+        <p class="body narrow center">Start with five cards. See what changes when nothing important gets lost.</p>
+        <a class="btn btn-dark btn-lg" href="app/">Start with Relo</a>
+      </div>
+    </section>
+  </main>
+
+  <footer class="foot">
+    <div class="wrap foot-inner">
+      <span>Relo · a sibling of <a href="https://nweinberg97.github.io/sedi/">Sedi</a></span>
+      <span>Free on the web · Your data stays on your device</span>
+    </div>
+  </footer>
+
+  <script src="landing.js" defer></script>
+</body>
+</html>
