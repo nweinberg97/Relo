@@ -1,6 +1,6 @@
 // Relo service worker: keeps the app shell available offline.
 // Workspace data lives in IndexedDB and is never cached here.
-const VERSION = 'relo-v1';
+const VERSION = 'relo-v2';
 const SHELL = [
   './', './index.html', './landing.css', './landing.js',
   './app/', './app/index.html', './app/app.css',

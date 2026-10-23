@@ -199,6 +199,7 @@ export function normalizeUrl(raw) {
 
 export function linkKind(url) {
   if (url.startsWith('mailto:')) return 'email';
+  if (url.startsWith('tel:')) return 'phone';
   try {
     const host = new URL(url).hostname;
     for (const [re, kind] of SOCIAL) if (re.test(host)) return kind;
@@ -211,6 +212,11 @@ export function inferFromInput(text) {
   const raw = text.trim();
   if (/^@[\w.]{2,}$/.test(raw)) {
     return { title: titleCase(raw.slice(1)), link: null, type: 'creator', handle: raw };
+  }
+  if (EMAIL_RE.test(raw)) {
+    // maya.chen@example.com -> "Maya Chen"
+    const local = raw.split('@')[0].replace(/\+.*$/, '');
+    return { title: titleCase(local), link: 'mailto:' + raw, type: 'person', kind: 'email' };
   }
   const url = /\s/.test(raw) ? null : normalizeUrl(raw);
   if (!url || url.startsWith('mailto:')) return null;
@@ -230,6 +236,70 @@ export function inferFromInput(text) {
 
 function titleCase(s) {
   return s.replace(/[._-]+/g, ' ').replace(/\s+/g, ' ').trim().replace(/\b\w/g, (c) => c.toUpperCase());
+}
+
+// ---------- contact methods ----------
+// Contact methods are stored in card.links as { id, kind, url, label? }.
+// Email uses mailto:, phone uses tel:, everything else is an https URL.
+
+export const CONTACT_KINDS = {
+  email:     { label: 'Email',     icon: 'mail',  placeholder: 'name@example.com' },
+  phone:     { label: 'Phone',     icon: 'phone', placeholder: '+1 604 555 0123' },
+  website:   { label: 'Website',   icon: 'globe', placeholder: 'example.com' },
+  instagram: { label: 'Instagram', icon: 'at',    placeholder: '@handle or profile link', base: 'https://www.instagram.com/' },
+  youtube:   { label: 'YouTube',   icon: 'play',  placeholder: '@channel or channel link', base: 'https://www.youtube.com/@' },
+  tiktok:    { label: 'TikTok',    icon: 'at',    placeholder: '@handle or profile link', base: 'https://www.tiktok.com/@' },
+  x:         { label: 'X',         icon: 'at',    placeholder: '@handle or profile link', base: 'https://x.com/' },
+  linkedin:  { label: 'LinkedIn',  icon: 'at',    placeholder: 'Profile link or username', base: 'https://www.linkedin.com/in/' },
+  podcast:   { label: 'Podcast',   icon: 'mic',   placeholder: 'Show link' },
+  other:     { label: 'Link',      icon: 'link',  placeholder: 'Any link' },
+};
+const KIND_ORDER = Object.keys(CONTACT_KINDS);
+export const sortContacts = (links) => [...links].sort((a, b) => KIND_ORDER.indexOf(a.kind) - KIND_ORDER.indexOf(b.kind));
+
+const EMAIL_RE = /^[\w.+-]+@[\w-]+(\.[\w-]+)+$/;
+const PHONE_RE = /^\+?[\d\s().-]{6,}$/;
+
+// Turn whatever the person typed into a contact method. `kind` is optional;
+// without it the kind is detected. Returns null if it can't be understood.
+export function parseContact(raw, kind = null) {
+  const v = raw.trim();
+  if (!v) return null;
+  if ((!kind || kind === 'email') && EMAIL_RE.test(v.replace(/^mailto:/i, ''))) {
+    const addr = v.replace(/^mailto:/i, '');
+    return { kind: 'email', url: 'mailto:' + addr, label: addr };
+  }
+  const digits = v.replace(/\D/g, '');
+  if ((!kind || kind === 'phone') && PHONE_RE.test(v.replace(/^tel:/i, '')) && digits.length >= 7 && digits.length <= 15) {
+    const clean = v.replace(/^tel:/i, '');
+    return { kind: 'phone', url: 'tel:' + (clean.trim().startsWith('+') ? '+' : '') + digits, label: clean };
+  }
+  if (kind === 'email' || kind === 'phone') return null;
+  // A bare handle for a chosen social network.
+  const base = kind && CONTACT_KINDS[kind]?.base;
+  if (base && /^@?[\w.-]{2,}$/.test(v) && !/\.[a-z]{2,}$/i.test(v.replace(/^@/, '').split('/')[0])) {
+    const handle = v.replace(/^@/, '');
+    return { kind, url: base + handle, label: kind === 'linkedin' ? handle : '@' + handle };
+  }
+  const url = normalizeUrl(v);
+  if (!url || url.startsWith('mailto:')) return null;
+  const detected = linkKind(url);
+  return { kind: detected === 'website' && kind && kind !== 'website' && !CONTACT_KINDS[kind]?.base ? kind : detected, url };
+}
+
+// What to show for a contact method.
+export function contactText(l) {
+  if (l.label) return l.label;
+  if (l.url.startsWith('mailto:')) return l.url.slice(7);
+  if (l.url.startsWith('tel:')) return l.url.slice(4);
+  try {
+    const u = new URL(l.url);
+    if (CONTACT_KINDS[l.kind]?.base) {
+      const seg = u.pathname.split('/').filter(Boolean).filter((p) => !['in', 'c', 'channel', 'user'].includes(p))[0];
+      if (seg) return l.kind === 'linkedin' ? seg : '@' + seg.replace(/^@/, '');
+    }
+    return (u.hostname.replace(/^www\./, '') + u.pathname).replace(/\/$/, '');
+  } catch { return l.url; }
 }
 
 // ---------- commands ----------
@@ -268,7 +338,7 @@ export function seedWorkspace(templateKeys, { withSamples }) {
       if (!withSamples) continue;
       const counters = {};
       for (const [title, type, stageIdx, description, links, fields, rem] of SAMPLES[key] || []) {
-        const card = newCard({ title, type, description, source: 'sample', links: links.map((u) => ({ id: uid('l_'), kind: linkKind(u), url: u })), customFields: fields });
+        const card = newCard({ title, type, description, source: 'sample', links: links.map((u) => parseContact(u)).filter(Boolean).map((l) => ({ id: uid('l_'), ...l })), customFields: fields });
         card.sample = true;
         t.put('cards', card);
         const stageId = stageIds[stageIdx];
@@ -526,11 +596,11 @@ export function exportJSON() {
 const csvCell = (v) => { const s = String(v ?? ''); return /[",\n]/.test(s) ? '"' + s.replace(/"/g, '""') + '"' : s; };
 
 export function exportCSV() {
-  const rows = [['title', 'type', 'boards', 'description', 'notes', 'links', 'next_step', 'next_step_due', 'archived', 'created_at', 'updated_at']];
+  const rows = [['title', 'type', 'boards', 'description', 'notes', 'email', 'phone', 'links', 'next_step', 'next_step_due', 'archived', 'created_at', 'updated_at']];
   for (const c of [...state.cards.values()].filter((c) => !c.deletedAt)) {
     const where = placementsOf(c.id).map((p) => `${state.boards.get(p.boardId)?.name} / ${state.stages.get(p.stageId)?.name}`).join('; ');
     const r = nextReminder(c.id);
-    rows.push([c.title, CARD_TYPES[c.type]?.label || c.type, where, c.description, c.notes, c.links.map((l) => l.url).join(' '), r?.title || '', r ? effectiveDue(r) : '', c.archivedAt ? 'yes' : '', c.createdAt, c.updatedAt]);
+    rows.push([c.title, CARD_TYPES[c.type]?.label || c.type, where, c.description, c.notes, c.links.filter((l) => l.kind === 'email').map(contactText).join('; '), c.links.filter((l) => l.kind === 'phone').map(contactText).join('; '), c.links.filter((l) => l.kind !== 'email' && l.kind !== 'phone').map((l) => l.url).join(' '), r?.title || '', r ? effectiveDue(r) : '', c.archivedAt ? 'yes' : '', c.createdAt, c.updatedAt]);
   }
   return rows.map((r) => r.map(csvCell).join(',')).join('\n');
 }

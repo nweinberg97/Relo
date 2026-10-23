@@ -266,7 +266,7 @@ type Board = { id: ID; name: string; description?: string; attentionCap: number;
 
 type BoardPlacement = { id: ID; cardId: ID; boardId: ID; stageId: ID; order: number; createdAt: ISODate; updatedAt: ISODate };
 
-type LinkKind = "website" | "email" | "linkedin" | "instagram" | "youtube" | "tiktok" | "x" | "podcast" | "other";
+type LinkKind = "website" | "email" | "phone" | "linkedin" | "instagram" | "youtube" | "tiktok" | "x" | "podcast" | "other";
 type CardLink = { id: ID; kind: LinkKind; label?: string; url: string };
 
 type Tag = { id: ID; name: string; colorToken?: string };
@@ -304,6 +304,8 @@ type WorkspaceData = {
   tags: Tag[]; reminders: Reminder[]; touchpoints: Touchpoint[]; relationships: Relationship[];
 };
 ```
+
+Contact methods (email, phone, website, social profiles) are stored in `links` with a `kind`; email uses `mailto:` and phone uses `tel:` URLs, with an optional display `label`.
 
 Type-specific data (creator platforms and audience size, tool pricing and trial status, company industry) lives in `customFields` in v1, restricted to JSON primitives.
 

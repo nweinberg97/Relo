@@ -202,10 +202,23 @@ function cardHTML(card, { where = false } = {}) {
     ${card.description ? `<div class="card-desc">${esc(card.description)}</div>` : ''}
     <div class="card-meta"><span class="chip" data-c="${c}">${esc(CARD_TYPES[card.type]?.label || 'Card')}</span>
       ${due ? `<span class="chip due ${due.state}" title="${esc(r.title)}">${icon('clock', 12)}${esc(due.short)}</span>` : ''}
-      ${card.links.length ? `<span class="meta-icon">${icon('link', 12)}${card.links.length > 1 ? card.links.length : ''}</span>` : ''}
+      ${contactIcons(card)}
     </div>
     ${where ? `<div class="where">${whereText ? esc(whereText) : 'Not on a board'}${card.archivedAt ? ' · Archived' : ''}</div>` : ''}
   </div>`;
+}
+
+// Up to four small icons showing how you can reach someone.
+function contactIcons(card) {
+  if (!card.links.length) return '';
+  const seen = [];
+  for (const l of S.sortContacts(card.links)) {
+    const k = S.CONTACT_KINDS[l.kind] ? l.kind : 'other';
+    if (!seen.includes(k)) seen.push(k);
+  }
+  const shown = seen.slice(0, 4);
+  const label = shown.map((k) => S.CONTACT_KINDS[k].label).join(', ');
+  return `<span class="meta-icon" title="${esc(label)}" aria-label="Contact: ${esc(label)}">${shown.map((k) => icon(S.CONTACT_KINDS[k].icon, 12)).join('')}${seen.length > 4 ? `+${seen.length - 4}` : ''}</span>`;
 }
 
 // ---------- board view ----------
@@ -511,6 +524,7 @@ const saveTimers = new Map();
 
 function openCard(id) {
   if (!state.cards.has(id)) return;
+  if (id !== ui.openCardId) contactKind = '';
   ui.openCardId = id;
   if (!panelEl) {
     panelPrevFocus = document.activeElement;
@@ -541,6 +555,45 @@ function closePanel() {
   back?.focus?.({ preventScroll: true });
 }
 
+
+// ---------- contact section ----------
+let contactKind = '';
+
+function contactSection(card) {
+  const list = S.sortContacts(card.links);
+  const kinds = Object.entries(S.CONTACT_KINDS);
+  const ph = contactKind ? S.CONTACT_KINDS[contactKind].placeholder : 'Email, phone, website, or social link';
+  return `<div class="p-sec" data-contact-sec><div class="p-label"><span>Contact</span></div>
+    ${list.length ? `<div class="contacts">${list.map(contactRow).join('')}</div>` : ''}
+    ${!list.length || contactKind ? `<div class="contact-chips">${(contactKind && S.CONTACT_KINDS[contactKind].base ? ['instagram', 'youtube', 'tiktok', 'x', 'linkedin'] : ['email', 'phone', 'website', 'instagram', 'youtube', 'linkedin']).map((k) => `<button type="button" class="filter-chip" data-ckind="${k}" aria-pressed="${contactKind === k}">${icon(S.CONTACT_KINDS[k].icon, 13)}${esc(S.CONTACT_KINDS[k].label)}</button>`).join('')}</div>` : ''}
+    <form class="contact-add" data-contact-form>
+      <select class="field" name="kind" aria-label="Contact type"><option value="">Detect</option>${kinds.map(([k, v]) => `<option value="${k}" ${contactKind === k ? 'selected' : ''}>${esc(v.label)}</option>`).join('')}</select>
+      <input class="field" name="value" placeholder="${esc(ph)}" autocomplete="off" aria-label="Add contact" inputmode="${contactKind === 'phone' ? 'tel' : contactKind === 'email' ? 'email' : 'text'}">
+      <button class="btn btn-secondary btn-sm" style="height:32px">Add</button>
+    </form>
+  </div>`;
+}
+
+function contactRow(l) {
+  const k = S.CONTACT_KINDS[l.kind] || S.CONTACT_KINDS.other;
+  const text = S.contactText(l);
+  const external = !(l.url.startsWith('mailto:') || l.url.startsWith('tel:'));
+  const verb = l.kind === 'email' ? 'Email' : l.kind === 'phone' ? 'Call' : 'Open';
+  return `<div class="contact-row" data-ck="${esc(l.kind)}">
+    <span class="k-tile">${icon(k.icon, 15)}</span>
+    <a class="c-main" href="${esc(l.url)}" ${external ? 'target="_blank" rel="noopener noreferrer"' : ''} title="${verb} ${esc(text)}">
+      <span class="c-text">${esc(text)}</span><span class="c-kind">${esc(k.label)}</span>
+    </a>
+    <button class="icon-btn" data-copy="${esc(l.kind === 'email' || l.kind === 'phone' ? text : l.url)}" aria-label="Copy ${esc(k.label.toLowerCase())}" title="Copy">${icon('copy', 14)}</button>
+    <button class="icon-btn" data-del-link="${l.id}" aria-label="Remove ${esc(k.label.toLowerCase())}" title="Remove">${icon('x', 13)}</button>
+  </div>`;
+}
+
+function focusContactInput() {
+  const i = panelEl?.querySelector('[data-contact-form] input');
+  i?.focus();
+}
+
 function renderPanel() {
   const card = state.cards.get(ui.openCardId);
   if (!card || card.deletedAt) return closePanel();
@@ -548,6 +601,9 @@ function renderPanel() {
   const ae = document.activeElement;
   const keep = ae && panelEl.contains(ae) && ae.dataset?.key ? { key: ae.dataset.key, value: ae.value, s: ae.selectionStart, e: ae.selectionEnd } : null;
   const scroll = panelEl.querySelector('.panel-body')?.scrollTop || 0;
+  const sameCard = panelEl.dataset.card === card.id;
+  const pendingContact = sameCard ? panelEl.querySelector('[data-contact-form] input')?.value || '' : '';
+  const contactFocused = ae?.closest?.('[data-contact-form]') && ae.name === 'value';
   const c = typeColor(card.type);
   const placements = S.placementsOf(card.id);
   const otherBoards = S.boards().filter((b) => !placements.some((p) => p.boardId === b.id));
@@ -594,20 +650,17 @@ function renderPanel() {
         <div class="quick-dates">${[['today', 'Later today'], ['tomorrow', 'Tomorrow'], ['friday', 'Friday'], ['week', 'Next week']].map(([k, l]) => `<button class="filter-chip" data-quick="${k}">${l}</button>`).join('')}</div>
       </div>
 
+      ${contactSection(card)}
+
+      <div class="p-sec"><div class="p-label"><span>Notes</span></div>
+        <textarea class="field notes grow-ta" data-key="notes" rows="5" placeholder="Anything worth remembering: how you met, what they care about, ideas to bring up…">${esc(card.notes)}</textarea></div>
+
       <div class="p-sec"><div class="p-label"><span>About</span></div>
-        <textarea class="field" data-key="description" placeholder="Who they are, why they matter…" rows="2">${esc(card.description)}</textarea></div>
+        <textarea class="field grow-ta" data-key="description" placeholder="One line on who they are and why they matter" rows="2">${esc(card.description)}</textarea></div>
 
       ${fields.length ? `<div class="p-sec"><div class="p-label"><span>Details</span></div><div class="kv">
         ${fields.map(([k, l]) => `<label for="cf-${k}">${esc(l)}</label><input id="cf-${k}" class="field" data-key="cf:${k}" value="${esc(card.customFields?.[k] ?? '')}" autocomplete="off">`).join('')}
       </div></div>` : ''}
-
-      <div class="p-sec"><div class="p-label"><span>Links</span></div>
-        <div class="links">${card.links.map((l) => `<div class="link-row">${icon(l.kind === 'email' ? 'message' : 'link', 14)}<a href="${esc(l.url)}" target="_blank" rel="noopener noreferrer">${esc(l.url.replace(/^(https?:\/\/(www\.)?|mailto:)/, '').replace(/\/$/, ''))}</a><span class="kind">${esc(l.kind)}</span><button class="icon-btn" data-del-link="${l.id}" aria-label="Remove link">${icon('x', 13)}</button></div>`).join('')}</div>
-        <form class="inline-add" data-link-form><input class="field" name="url" placeholder="Paste a link, handle, or email" autocomplete="off" aria-label="Add link"><button class="btn btn-secondary btn-sm" style="height:32px">Add</button></form>
-      </div>
-
-      <div class="p-sec"><div class="p-label"><span>Notes</span></div>
-        <textarea class="field" data-key="notes" rows="4" placeholder="Anything worth remembering…">${esc(card.notes)}</textarea></div>
 
       <div class="p-sec"><div class="p-label"><span>Activity</span></div>
         <form class="log-form" data-log-form>
@@ -618,8 +671,10 @@ function renderPanel() {
       </div>
     </div>`;
 
-  const ta = panelEl.querySelector('.p-title');
-  autoGrow(ta);
+  $$('.p-title, .grow-ta', panelEl).forEach(autoGrow);
+  const ci = panelEl.querySelector('[data-contact-form] input');
+  panelEl.dataset.card = card.id;
+  if (ci && pendingContact) { ci.value = pendingContact; if (contactFocused) ci.focus({ preventScroll: true }); }
   panelEl.querySelector('.panel-body').scrollTop = scroll;
   if (keep) {
     const el = panelEl.querySelector(`[data-key="${CSS.escape(keep.key)}"]`);
@@ -627,7 +682,11 @@ function renderPanel() {
   }
 }
 
-function autoGrow(el) { if (el?.classList.contains('p-title')) { el.style.height = 'auto'; el.style.height = el.scrollHeight + 'px'; } }
+function autoGrow(el) {
+  if (!el || !(el.classList.contains('p-title') || el.classList.contains('grow-ta'))) return;
+  el.style.height = 'auto';
+  el.style.height = el.scrollHeight + 2 + 'px';
+}
 
 function panelInput(e) {
   const el = e.target;
@@ -660,6 +719,14 @@ function panelKey(e) {
 }
 
 async function panelChange(e) {
+  if (e.target.name === 'kind' && e.target.closest('[data-contact-form]')) {
+    contactKind = e.target.value;
+    const keepVal = e.target.form.value.value;
+    renderPanel();
+    const i = panelEl.querySelector('[data-contact-form] input');
+    i.value = keepVal; i.focus();
+    return;
+  }
   const sel = e.target.closest('[data-stage-for]');
   if (sel) {
     const boardId = sel.dataset.stageFor;
@@ -678,7 +745,15 @@ async function panelClick(e) {
   const rm = t.closest('[data-remove-from]');
   if (rm) { await S.removeFromBoard(cardId, rm.dataset.removeFrom); return toast('Removed from board.', undoAction()); }
   const dl = t.closest('[data-del-link]');
-  if (dl) { const c = state.cards.get(cardId); return S.updateCard(cardId, { links: c.links.filter((l) => l.id !== dl.dataset.delLink) }, 'Removed link'); }
+  if (dl) { const c = state.cards.get(cardId); await S.updateCard(cardId, { links: c.links.filter((l) => l.id !== dl.dataset.delLink) }, 'Removed contact'); return toast('Removed.', undoAction()); }
+  const ck = t.closest('[data-ckind]');
+  if (ck) { contactKind = contactKind === ck.dataset.ckind ? '' : ck.dataset.ckind; renderPanel(); return focusContactInput(); }
+  const cp = t.closest('[data-copy]');
+  if (cp) {
+    try { await navigator.clipboard.writeText(cp.dataset.copy); toast('Copied.'); }
+    catch { toast('Couldn\'t copy. Select the text instead.'); }
+    return;
+  }
   const qd = t.closest('[data-quick]');
   if (qd) {
     const form = panelEl.querySelector('[data-next-form]');
@@ -716,15 +791,31 @@ function panelSubmitHandler() {
     const f = e.target;
     const cardId = ui.openCardId;
     if ('nextForm' in f.dataset) return submitNext(f);
-    if ('linkForm' in f.dataset) {
-      const raw = f.url.value.trim();
-      if (!raw) return;
-      let url = S.normalizeUrl(raw);
-      if (!url && /^@[\w.]{2,}$/.test(raw)) url = null;
-      if (!url) { toast('That doesn\'t look like a link or email.'); return; }
+    if ('contactForm' in f.dataset) {
+      const raw = f.value.value.trim();
+      if (!raw) return f.value.focus();
+      const parsed = S.parseContact(raw, f.kind.value || null);
+      if (!parsed && !f.kind.value && /^@?[\w.-]{2,}$/.test(raw) && !/\./.test(raw.replace(/^@/, '').slice(-4))) {
+        // A bare handle: ask which network it belongs to.
+        contactKind = 'instagram';
+        renderPanel();
+        const i = panelEl.querySelector('[data-contact-form] input');
+        i.value = raw; i.focus();
+        toast('Which network is that handle on? Pick one, then press Add.');
+        return;
+      }
+      if (!parsed) {
+        const k = f.kind.value;
+        toast(k === 'email' ? 'That doesn\'t look like an email address.' : k === 'phone' ? 'That doesn\'t look like a phone number.' : 'Couldn\'t tell what that is. Try a link, email, or phone number.');
+        return f.value.focus();
+      }
       const c = state.cards.get(cardId);
-      await S.updateCard(cardId, { links: [...c.links, { id: S.uid('l_'), kind: S.linkKind(url), url }] }, 'Added link');
-      panelEl?.querySelector('[data-link-form] input')?.focus();
+      if (c.links.some((l) => l.url.toLowerCase() === parsed.url.toLowerCase())) { toast('Already saved.'); f.value.select(); return; }
+      contactKind = '';
+      f.value.value = '';
+      await S.updateCard(cardId, { links: [...c.links, { id: S.uid('l_'), ...parsed }] }, 'Added contact');
+      focusContactInput();
+      return;
     }
     if ('logForm' in f.dataset) {
       const summary = f.summary.value.trim();
@@ -790,7 +881,8 @@ function quickAdd(pre = {}) {
         link = inf?.link || null;
         if (inf) {
           hint.className = 'qa-hint found';
-          hint.textContent = inf.title ? `Will save as “${inf.title}”${link ? ' with the link attached' : ''}.` : 'Link will be attached.';
+          const what = inf.kind === 'email' ? 'email' : 'link';
+          hint.textContent = inf.title ? `Will save as “${inf.title}” with the ${what} attached.` : `The ${what} will be attached. Add a name if you like.`;
           if (inf.type && !typeTouched) setType(inf.type);
           input.dataset.inferred = inf.title || '';
         } else {

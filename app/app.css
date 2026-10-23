@@ -408,3 +408,29 @@ select.field { appearance: none; padding-right: 28px; background-image: url("dat
   .modal-wrap { padding-top: 8vh; }
   .kv { grid-template-columns: 1fr; }
 }
+
+/* ---------- contact ---------- */
+.contacts { display: flex; flex-direction: column; gap: 2px; margin-bottom: 8px; }
+.contact-row { display: flex; align-items: center; gap: 10px; padding: 6px 6px 6px 6px; border-radius: var(--radius-sm); transition: background var(--t-1); }
+.contact-row:hover { background: var(--well); }
+.contact-row .icon-btn { width: 26px; height: 26px; opacity: 0; transition: opacity var(--t-1), background var(--t-1); }
+.contact-row:hover .icon-btn, .contact-row:focus-within .icon-btn { opacity: 1; }
+.k-tile { width: 30px; height: 30px; flex: none; border-radius: 9px; display: grid; place-items: center; background: var(--neutral-soft); color: var(--neutral); }
+.contact-row[data-ck="email"] .k-tile { background: var(--person-soft); color: var(--person); }
+.contact-row[data-ck="phone"] .k-tile { background: var(--tool-soft); color: var(--tool); }
+.contact-row[data-ck="website"] .k-tile { background: var(--community-soft); color: var(--community); }
+.contact-row:is([data-ck="instagram"], [data-ck="youtube"], [data-ck="tiktok"], [data-ck="x"], [data-ck="linkedin"], [data-ck="podcast"]) .k-tile { background: var(--creator-soft); color: var(--creator); }
+.c-main { flex: 1; min-width: 0; display: flex; flex-direction: column; text-decoration: none; color: inherit; border-radius: 6px; }
+.c-main:hover .c-text { text-decoration: underline; text-underline-offset: 2px; text-decoration-color: var(--line-strong); }
+.c-text { font-weight: 500; font-size: 13px; line-height: 18px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.c-kind { font-size: 11px; line-height: 15px; color: var(--ink-400); }
+.contact-chips { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 8px; }
+.contact-chips .filter-chip { display: inline-flex; align-items: center; gap: 5px; height: 28px; }
+.contact-add { display: flex; gap: 6px; }
+.contact-add select { width: 104px; flex: none; min-height: 32px; padding: 5px 26px 5px 10px; font-size: 13px; }
+.contact-add input { flex: 1; min-width: 0; min-height: 32px; padding: 6px 10px; }
+textarea.notes { min-height: 120px; line-height: 21px; }
+textarea.grow-ta { resize: none; overflow: hidden; }
+.meta-icon .icon { width: 12px; height: 12px; }
+.meta-icon { gap: 5px; }
+@media (hover: none) { .contact-row .icon-btn { opacity: 1; } }

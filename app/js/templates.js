@@ -69,20 +69,20 @@ export const BLANK_TEMPLATE = {
 // reminder: [title, dayOffset, hour]
 export const SAMPLES = {
   partnerships: [
-    ['Northstar Wellness', 'company', 1, 'Mindful-living brand with a strong creator program.', ['https://northstar.example'], { industry: 'Wellness', partnershipIdea: 'Co-hosted morning-routine challenge' }, ['Send a short intro note', 0, 10]],
+    ['Northstar Wellness', 'company', 1, 'Mindful-living brand with a strong creator program.', ['northstar.example', 'partners@northstar.example', 'https://www.instagram.com/northstar.example'], { industry: 'Wellness', partnershipIdea: 'Co-hosted morning-routine challenge' }, ['Send a short intro note', 0, 10]],
     ['Field & Fold Paper Co.', 'company', 0, 'Notebooks and planners. Loved their last limited run.', [], { industry: 'Stationery' }],
-    ['Lumen Audio', 'company', 2, 'Talked about sponsoring a video series in the spring.', [], { industry: 'Audio' }, ['Follow up on the spring series', -2, 9]],
+    ['Lumen Audio', 'company', 2, 'Talked about sponsoring a video series in the spring.', ['dana@lumenaudio.example', '+1 604 555 0142'], { industry: 'Audio' }, ['Follow up on the spring series', -2, 9]],
     ['Common Thread Coffee', 'company', 3, 'Running the monthly giveaway together.', [], { industry: 'Coffee' }],
   ],
   creators: [
-    ['Maya Chen', 'creator', 2, 'Wellness creator focused on sustainable routines.', ['https://www.instagram.com/example'], { platforms: 'Instagram, YouTube', audience: '84K', niche: 'Wellness' }, ['Draft a collaboration idea', 1, 9]],
-    ['Jordan Okafor', 'creator', 1, 'Hosts a podcast about small creative businesses.', [], { platforms: 'Podcast', niche: 'Indie business' }],
+    ['Maya Chen', 'creator', 2, 'Wellness creator focused on sustainable routines.', ['https://www.instagram.com/example', 'https://www.youtube.com/@example', 'maya@example.com'], { platforms: 'Instagram, YouTube', audience: '84K', niche: 'Wellness' }, ['Draft a collaboration idea', 1, 9]],
+    ['Jordan Okafor', 'creator', 1, 'Hosts a podcast about small creative businesses.', ['https://podcasts.apple.com/podcast/example', 'jordan@example.com'], { platforms: 'Podcast', niche: 'Indie business' }],
     ['Priya Raman', 'creator', 0, 'Makes calm desk-setup videos.', [], { platforms: 'YouTube', audience: '210K' }],
     ['Alex Rivera', 'creator', 3, 'Co-writing a newsletter issue next month.', [], { platforms: 'Newsletter', niche: 'Design' }, ['Share the outline', 4, 11]],
   ],
   people: [
-    ['Sam Whitaker', 'person', 0, 'Met at the indie-makers meetup. Builds hardware.', [], { role: 'Founder', company: 'Brightwork' }],
-    ['Lena Park', 'person', 1, 'Product designer, generous with feedback.', [], { role: 'Designer' }, ['Say thanks for the portfolio notes', 0, 15]],
+    ['Sam Whitaker', 'person', 0, 'Met at the indie-makers meetup. Builds hardware.', ['sam@brightwork.example', 'brightwork.example'], { role: 'Founder', company: 'Brightwork' }],
+    ['Lena Park', 'person', 1, 'Product designer, generous with feedback.', ['lena@example.com', '(778) 555-0199', 'https://www.linkedin.com/in/example'], { role: 'Designer' }, ['Say thanks for the portfolio notes', 0, 15]],
     ['Dev Kapoor', 'person', 3, 'Former teammate. Catch up every couple of months.', [], { role: 'Engineer' }],
   ],
   tools: [

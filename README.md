@@ -15,9 +15,11 @@ Relo is a private, visual workspace for the people, brands, creators, tools, and
 - **Drag and drop** between stages with a lifted card, an insertion line, edge auto-scroll, and a settle animation. Press and hold to drag on touch.
 - **Keyboard moves:** focus a card, press `Space`, use arrow keys, `Enter` to drop, `Esc` to cancel. Arrow keys also move focus between cards.
 - **Attention caps:** each board has a cap on cards in play. Parked stages don't count, so parking something actually frees room.
-- **Card detail panel:** name, type, description, type-specific fields, links, notes, next steps, and an activity timeline. Edits autosave.
+- **Card detail panel:** name, type, next steps, contact info, notes, description, type-specific fields, and an activity timeline. Edits autosave.
+- **Contact info:** email, phone, website, Instagram, YouTube, TikTok, X, LinkedIn, podcasts, and any other link. Paste anything and Relo detects what it is; type a bare `@handle` and it asks which network. One click to email, call, open, or copy. Cards show small icons for how you can reach someone.
+- **Notes:** a roomy notes field on every card for how you met, what they care about, and ideas to bring up.
 - **Today:** overdue, today, and the next 7 days of next steps, with complete and snooze.
-- **Quick add** (`C`): type a name, or paste a link or `@handle` and Relo suggests a name and type.
+- **Quick add** (`C`): type a name, or paste a link, email, or `@handle` and Relo suggests a name and type.
 - **Command palette** (`⌘K` / `Ctrl+K`): search cards and boards, run actions.
 - **All cards:** search and filter by type, including archived cards.
 - **Undo** for every change (toast button or `⌘Z` / `Ctrl+Z`).
